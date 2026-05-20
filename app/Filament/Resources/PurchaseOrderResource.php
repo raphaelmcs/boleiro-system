@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PurchaseOrderResource\Pages;
 use App\Filament\Resources\PurchaseOrderResource\RelationManagers;
+use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,8 +20,9 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-tray';
 
-    protected static ?string $modelLabel = 'Pedido de Compra';
-    protected static ?string $pluralModelLabel = 'Pedidos de Compra (Inbound)';
+    protected static ?string $navigationGroup = 'Estoque e Fornecedores';
+    protected static ?string $modelLabel = 'Compra para Estoque';
+    protected static ?string $pluralModelLabel = 'Compras para Estoque';
 
     public static function form(Form $form): Form
     {
@@ -64,8 +66,9 @@ class PurchaseOrderResource extends Resource
                             ->relationship()
                             ->schema([
                                 Forms\Components\Select::make('product_variant_id')
-                                    ->relationship('productVariant', 'id', fn ($query) => $query->join('products', 'products.id', '=', 'product_variants.product_id')->selectRaw('product_variants.id, CONCAT(products.team_name, " - ", products.season, " (", product_variants.size, ")") as variant_name')->orderBy('products.team_name'))
-                                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->product->team_name} - {$record->product->season} ({$record->size})")
+                                    ->options(fn (): array => ProductVariant::optionLabels())
+                                    ->getSearchResultsUsing(fn (string $search): array => ProductVariant::optionLabels($search))
+                                    ->getOptionLabelUsing(fn ($value): ?string => ProductVariant::with('product')->find($value)?->displayName())
                                     ->label('Produto (Tamanho)')
                                     ->required()
                                     ->searchable()

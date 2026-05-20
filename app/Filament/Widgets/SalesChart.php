@@ -2,28 +2,29 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use App\Models\SalesOrder;
+use Filament\Widgets\ChartWidget;
 
 class SalesChart extends ChartWidget
 {
     protected static ?string $heading = 'Vendas por Mês';
-    protected static ?int $sort = 2;
+
+    protected static ?int $sort = 3;
 
     protected function getData(): array
     {
         $data = [];
         $labels = [];
-        
+
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $labels[] = $month->translatedFormat('M Y');
-            
+
             $sum = SalesOrder::where('financial_status', 'pago')
                 ->whereMonth('order_date', $month->month)
                 ->whereYear('order_date', $month->year)
                 ->sum('total_amount');
-                
+
             $data[] = $sum;
         }
 

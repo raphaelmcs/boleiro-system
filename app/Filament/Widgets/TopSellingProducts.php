@@ -2,16 +2,23 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Product;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use App\Models\Product;
 
 class TopSellingProducts extends BaseWidget
 {
     protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = 'full';
+
+    protected int|string|array $columnSpan = 'full';
+
     protected static ?string $heading = 'Produtos Mais Vendidos';
+
+    public static function canView(): bool
+    {
+        return false;
+    }
 
     public function table(Table $table): Table
     {
@@ -32,8 +39,13 @@ class TopSellingProducts extends BaseWidget
                     ->searchable(),
                 Tables\Columns\TextColumn::make('season')
                     ->label('Temporada'),
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('Gênero')
+                    ->formatStateUsing(fn (?string $state): string => Product::genderLabel($state))
+                    ->badge(),
                 Tables\Columns\TextColumn::make('version')
                     ->label('Versão')
+                    ->formatStateUsing(fn (?string $state): string => Product::versionLabel($state))
                     ->badge(),
                 Tables\Columns\TextColumn::make('total_sold')
                     ->label('Qtd. Vendida (Unidades)')

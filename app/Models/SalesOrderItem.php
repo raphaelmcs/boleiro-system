@@ -15,10 +15,14 @@ class SalesOrderItem extends Model
         'is_customized',
         'custom_name',
         'custom_number',
+        'sent_to_customization_at',
+        'customization_stock_deducted_at',
     ];
 
     protected $casts = [
         'is_customized' => 'boolean',
+        'sent_to_customization_at' => 'datetime',
+        'customization_stock_deducted_at' => 'datetime',
     ];
 
     public function salesOrder()
@@ -29,5 +33,26 @@ class SalesOrderItem extends Model
     public function productVariant()
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+
+    public function hasCustomizationStockDeducted(): bool
+    {
+        return $this->customization_stock_deducted_at !== null;
+    }
+
+    public function hasBeenSentToCustomization(): bool
+    {
+        return $this->sent_to_customization_at !== null;
+    }
+
+    public function customizationStockStatus(): string
+    {
+        if (! $this->is_customized) {
+            return 'Sem personalização';
+        }
+
+        return $this->hasBeenSentToCustomization()
+            ? 'Enviado'
+            : 'Pendente';
     }
 }
